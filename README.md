@@ -6,7 +6,7 @@ AdaptiLearn is a Spring Boot REST API with a React/Vite workspace for managing t
 
 - JDK 17 or newer (the Maven project targets Java 17)
 - Node.js 20.19+ or 22.12+
-- MySQL is optional for local development; H2 is used by default
+- XAMPP with its MySQL service enabled
 
 ## Run locally
 
@@ -18,7 +18,7 @@ AdaptiLearn is a Spring Boot REST API with a React/Vite workspace for managing t
    .\mvnw.cmd spring-boot:run
    ```
 
-   Replace the example path with the installed JDK directory (the system `java` command must use Java 17 or newer). The API starts at `http://localhost:8080`. The default H2 file database is created at `data/adaptilearn`; no database server is needed.
+   Replace the example path with the installed JDK directory (the system `java` command must use Java 17 or newer). Start MySQL from the XAMPP Control Panel first. The API starts at `http://localhost:8080` and connects to the `adaptilearn` database on `localhost:3306`; MySQL creates that database automatically if it does not exist. XAMPP's default `root` account with a blank password is used.
 
 2. In another terminal, start the frontend:
 
@@ -37,12 +37,12 @@ AdaptiLearn is a Spring Boot REST API with a React/Vite workspace for managing t
    npm run build
    ```
 
-## Use MySQL instead
+## Configure MySQL credentials
 
-Set these environment variables before starting Spring Boot:
+If your XAMPP MySQL uses a different port or password, set these environment variables before starting Spring Boot:
 
 ```powershell
-$env:DATABASE_URL = "jdbc:mysql://localhost:3306/adaptilearn?createDatabaseIfNotExist=true"
+$env:DATABASE_URL = "jdbc:mysql://localhost:3307/adaptilearn?createDatabaseIfNotExist=true"
 $env:DATABASE_USERNAME = "root"
 $env:DATABASE_PASSWORD = "<your-local-mysql-password>"
 .\mvnw.cmd spring-boot:run
