@@ -32,6 +32,10 @@ public class QuestionService {
         return questionRepository.findAll();
     }
 
+    public List<Question> findByDifficulty(Difficulty difficulty) {
+        return questionRepository.findByDifficulty(difficulty);
+    }
+
     public List<Question> findByQuiz(Long quizId, Difficulty difficulty) {
         return difficulty == null
                 ? questionRepository.findByQuizId(quizId)

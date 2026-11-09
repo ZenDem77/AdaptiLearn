@@ -48,9 +48,20 @@ public class UserService {
 
     public User update(Long id, User updated) {
         User existing = findById(id);
+        if (updated.getFullName() == null || updated.getFullName().isBlank()
+                || updated.getEmail() == null || updated.getEmail().isBlank()
+                || updated.getRole() == null || updated.getRewardPoints() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name, email, role, and non-negative reward points are required");
+        }
+        userRepository.findByEmail(updated.getEmail()).ifPresent(user -> {
+            if (!user.getId().equals(id)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
+            }
+        });
         existing.setFullName(updated.getFullName());
         existing.setEmail(updated.getEmail());
         existing.setRole(updated.getRole());
+        existing.setRewardPoints(updated.getRewardPoints());
         if (updated.getPassword() != null && !updated.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(updated.getPassword()));
         }

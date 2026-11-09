@@ -7,6 +7,7 @@ public record LessonRequest(
         @NotBlank String title,
         String description,
         String content,
-        @NotNull Long teacherId
+        @NotNull Long teacherId,
+        @NotNull Long classroomId
 ) {
 }

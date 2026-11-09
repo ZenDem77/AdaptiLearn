@@ -3,6 +3,7 @@ package com.csit321g4.zenzone.adaptilearn.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,10 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @NotNull
     @Column(nullable = false)
     private Role role;
+
+    @Column(nullable = false)
+    private int rewardPoints;
 }

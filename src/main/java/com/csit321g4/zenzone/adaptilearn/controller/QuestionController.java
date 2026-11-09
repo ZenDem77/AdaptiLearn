@@ -29,7 +29,10 @@ public class QuestionController {
     @GetMapping
     public List<Question> findAll(@RequestParam(required = false) Long quizId,
                                   @RequestParam(required = false) Difficulty difficulty) {
-        return quizId == null ? questionService.findAll() : questionService.findByQuiz(quizId, difficulty);
+        if (quizId != null) {
+            return questionService.findByQuiz(quizId, difficulty);
+        }
+        return difficulty == null ? questionService.findAll() : questionService.findByDifficulty(difficulty);
     }
 
     @GetMapping("/{id}")

@@ -16,10 +16,12 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final UserService userService;
+    private final ClassroomService classroomService;
 
-    public LessonService(LessonRepository lessonRepository, UserService userService) {
+    public LessonService(LessonRepository lessonRepository, UserService userService, ClassroomService classroomService) {
         this.lessonRepository = lessonRepository;
         this.userService = userService;
+        this.classroomService = classroomService;
     }
 
     public Lesson create(LessonRequest request) {
@@ -60,5 +62,6 @@ public class LessonService {
         lesson.setDescription(request.description());
         lesson.setContent(request.content());
         lesson.setTeacher(teacher);
+        lesson.setClassroom(classroomService.findById(request.classroomId()));
     }
 }

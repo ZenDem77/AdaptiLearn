@@ -33,6 +33,10 @@ public class Lesson {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private Classroom classroom;
+
     private LocalDateTime createdAt;
 
     @PrePersist
