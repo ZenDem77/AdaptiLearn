@@ -1,0 +1,14 @@
+package com.csit321g4.zenzone.adaptilearn.repository;
+
+import com.csit321g4.zenzone.adaptilearn.entity.Difficulty;
+import com.csit321g4.zenzone.adaptilearn.entity.Question;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface QuestionRepository extends JpaRepository<Question, Long> {
+
+    List<Question> findByQuizId(Long quizId);
+
+    List<Question> findByQuizIdAndDifficulty(Long quizId, Difficulty difficulty);
+}

@@ -1,0 +1,50 @@
+package com.csit321g4.zenzone.adaptilearn.controller;
+
+import com.csit321g4.zenzone.adaptilearn.dto.QuestionRequest;
+import com.csit321g4.zenzone.adaptilearn.entity.Difficulty;
+import com.csit321g4.zenzone.adaptilearn.entity.Question;
+import com.csit321g4.zenzone.adaptilearn.service.QuestionService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/questions")
+public class QuestionController {
+
+    private final QuestionService questionService;
+
+    public QuestionController(QuestionService questionService) {
+        this.questionService = questionService;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Question create(@Valid @RequestBody QuestionRequest request) {
+        return questionService.create(request);
+    }
+
+    @GetMapping
+    public List<Question> findAll(@RequestParam(required = false) Long quizId,
+                                  @RequestParam(required = false) Difficulty difficulty) {
+        return quizId == null ? questionService.findAll() : questionService.findByQuiz(quizId, difficulty);
+    }
+
+    @GetMapping("/{id}")
+    public Question findById(@PathVariable Long id) {
+        return questionService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Question update(@PathVariable Long id, @Valid @RequestBody QuestionRequest request) {
+        return questionService.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        questionService.delete(id);
+    }
+}
