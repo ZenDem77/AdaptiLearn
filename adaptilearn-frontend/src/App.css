@@ -36,13 +36,18 @@
 
 .brand-mark {
   display: grid;
+  overflow: hidden;
   width: 34px;
   height: 34px;
   place-items: center;
   border-radius: 11px;
-  color: #fff;
   background: var(--green);
-  font-size: 18px;
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .nav-label {
@@ -105,6 +110,53 @@
   margin-left: auto;
   color: #98a19b;
   font-size: 11px;
+}
+
+.skeleton {
+  display: block;
+  border-radius: 4px;
+  background-color: #edf1ed;
+  background-image: linear-gradient(90deg, #edf1ed 0%, #f8faf8 50%, #edf1ed 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-sidebar-count {
+  width: 18px;
+  height: 10px;
+}
+
+.skeleton-stat-number {
+  width: 58px;
+  height: 26px;
+}
+
+.skeleton-resource-count {
+  width: 48px;
+  height: 10px;
+}
+
+.skeleton-cell {
+  width: min(120px, 100%);
+  height: 12px;
+}
+
+.skeleton-cell-primary {
+  width: min(170px, 100%);
+}
+
+.skeleton-cell-actions {
+  margin-left: auto;
+}
+
+@keyframes skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }
 
 .sidebar-footer {
@@ -689,7 +741,6 @@ tbody tr:hover {
   color: #ad514b;
 }
 
-.loading-state,
 .empty-state {
   display: flex;
   min-height: 225px;
@@ -699,10 +750,6 @@ tbody tr:hover {
   padding: 24px;
   color: var(--muted);
   text-align: center;
-}
-
-.loading-state {
-  font-size: 12px;
 }
 
 .empty-state p {
@@ -783,6 +830,36 @@ tbody tr:hover {
 
 .connection-dialog-content .dialog-actions {
   padding: 0;
+}
+
+.connection-error-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: var(--canvas);
+}
+
+.connection-error-content {
+  width: min(440px, 100%);
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 18px 70px rgb(18 42 27 / 9%);
+  text-align: center;
+}
+
+.connection-error-content h1 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.connection-error-content > p:not(.eyebrow) {
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .dialog-heading {

@@ -19,13 +19,19 @@ function AppShell() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [connectionError, setConnectionError] = useState('')
+  const [connectionPageError, setConnectionPageError] = useState('')
   const [notice, setNotice] = useState('')
   const [questions, setQuestions] = useState([])
 
-  const reportError = useCallback((requestError) => {
+  const reportError = useCallback((requestError, showConnectionPage = false) => {
     if (requestError.name === 'BackendConnectionError') {
       setError('')
-      setConnectionError(requestError.message)
+      if (showConnectionPage) {
+        setConnectionError('')
+        setConnectionPageError(requestError.message)
+      } else {
+        setConnectionError(requestError.message)
+      }
     } else {
       setError(requestError.message)
     }
@@ -39,13 +45,14 @@ function AppShell() {
     return Object.fromEntries(entries)
   }, [])
 
-  const loadRecords = useCallback(async () => {
+  const loadRecords = useCallback(async (showConnectionPageOnFailure = false) => {
     try {
       setRecords(await fetchRecords())
       setError('')
       setConnectionError('')
+      setConnectionPageError('')
     } catch (loadError) {
-      reportError(loadError)
+      reportError(loadError, showConnectionPageOnFailure)
     } finally {
       setLoading(false)
     }
@@ -69,9 +76,9 @@ function AppShell() {
     return () => { cancelled = true }
   }, [fetchRecords, reportError])
 
-  const refreshRecords = () => {
+  const refreshRecords = (showConnectionPageOnFailure = false) => {
     setLoading(true)
-    return loadRecords()
+    return loadRecords(showConnectionPageOnFailure)
   }
 
   const activeResource = resources.find((resource) => resource.key === activeKey)
@@ -171,11 +178,31 @@ function AppShell() {
     (!form.difficulty || question.difficulty === form.difficulty),
   )
 
+  if (connectionPageError) {
+    return (
+      <main className="connection-error-page">
+        <section className="connection-error-content" role="alert">
+          <p className="eyebrow">CONNECTION ERROR</p>
+          <h1>Backend unavailable</h1>
+          <p>{connectionPageError}</p>
+          <button
+            className="button button-primary"
+            onClick={() => refreshRecords(true)}
+            disabled={loading}
+          >
+            {loading ? 'Retrying...' : 'Retry connection'}
+          </button>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <div className="app-shell">
       <Sidebar
         activeKey={activeKey}
         records={records}
+        loading={loading}
         onOverviewClick={() => {
           setActiveKey('dashboard')
           setSearch('')
@@ -271,7 +298,7 @@ function AppShell() {
               <p id="connection-error-message">{connectionError}</p>
               <div className="dialog-actions">
                 <button type="button" className="button button-quiet" onClick={() => setConnectionError('')}>Close</button>
-                <button type="button" className="button button-primary" onClick={refreshRecords}>Retry</button>
+                <button type="button" className="button button-primary" onClick={() => refreshRecords(true)} disabled={loading}>{loading ? 'Retrying...' : 'Retry'}</button>
               </div>
             </div>
           </section>
@@ -281,11 +308,11 @@ function AppShell() {
   )
 }
 
-function Sidebar({ activeKey, records, onOverviewClick, onResourceClick }) {
+function Sidebar({ activeKey, records, loading, onOverviewClick, onResourceClick }) {
   return (
     <aside className="sidebar" aria-label="Main navigation">
       <button className="brand" onClick={onOverviewClick}>
-        <span className="brand-mark" aria-hidden="true">A</span>
+        <span className="brand-mark" aria-hidden="true"><img src="/adaptilearn-logo.svg" alt="" /></span>
         <span>AdaptiLearn</span>
       </button>
       <div className="nav-label">WORKSPACE</div>
@@ -301,7 +328,9 @@ function Sidebar({ activeKey, records, onOverviewClick, onResourceClick }) {
         >
           <span className="nav-icon" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
           {resource.label}
-          <span className="nav-count">{records[resource.key]?.length ?? 0}</span>
+          <span className="nav-count">
+            {loading ? <span className="skeleton skeleton-sidebar-count" aria-hidden="true" /> : records[resource.key]?.length ?? 0}
+          </span>
         </button>
       ))}
       <div className="sidebar-footer">
@@ -324,19 +353,19 @@ function Dashboard({ records, loading, onSelect }) {
         </div>
         <div className="welcome-art" aria-hidden="true"><span>Learn</span><i /><b /></div>
       </section>
-      <section className="overview-stats" aria-label="Workspace summary">
-        <article className="stat-card"><span className="stat-icon">01</span><p>Total records</p><strong>{loading ? '...' : total}</strong><small>Across your workspace</small></article>
-        <article className="stat-card"><span className="stat-icon">02</span><p>Learning content</p><strong>{loading ? '...' : (records.lessons?.length ?? 0) + (records.quizzes?.length ?? 0) + (records.questions?.length ?? 0)}</strong><small>Lessons, quizzes, questions</small></article>
-        <article className="stat-card"><span className="stat-icon">03</span><p>People</p><strong>{loading ? '...' : records.users?.length ?? 0}</strong><small>Students and teachers</small></article>
+      <section className="overview-stats" aria-label="Workspace summary" aria-busy={loading}>
+        <article className="stat-card"><span className="stat-icon">01</span><p>Total records</p><strong>{loading ? <span className="skeleton skeleton-stat-number" aria-hidden="true" /> : total}</strong><small>Across your workspace</small></article>
+        <article className="stat-card"><span className="stat-icon">02</span><p>Learning content</p><strong>{loading ? <span className="skeleton skeleton-stat-number" aria-hidden="true" /> : (records.lessons?.length ?? 0) + (records.quizzes?.length ?? 0) + (records.questions?.length ?? 0)}</strong><small>Lessons, quizzes, questions</small></article>
+        <article className="stat-card"><span className="stat-icon">03</span><p>People</p><strong>{loading ? <span className="skeleton skeleton-stat-number" aria-hidden="true" /> : records.users?.length ?? 0}</strong><small>Students and teachers</small></article>
       </section>
       <section className="section-heading"><div><p className="eyebrow">QUICK ACCESS</p><h2>Manage your learning data</h2></div></section>
-      <section className="resource-grid" aria-label="Learning data sections">
+      <section className="resource-grid" aria-label="Learning data sections" aria-busy={loading}>
         {resources.map((resource, index) => (
           <button className="resource-card" key={resource.key} onClick={() => onSelect(resource.key)}>
             <span className={`resource-icon resource-icon-${index % 4}`}>{String(index + 1).padStart(2, '0')}</span>
             <span className="resource-card-copy"><strong>{resource.label}</strong><small>{resource.description}</small></span>
             <span className="resource-arrow" aria-hidden="true">&gt;</span>
-            <span className="resource-total">{loading ? '...' : records[resource.key]?.length ?? 0} records</span>
+            <span className="resource-total">{loading ? <span className="skeleton skeleton-resource-count" aria-hidden="true" /> : `${records[resource.key]?.length ?? 0} records`}</span>
           </button>
         ))}
       </section>
@@ -358,7 +387,7 @@ function ResourcePanel({ resource, rows, loading, search, onSearchChange, onAdd,
         </button>
       </section>
 
-      <section className="panel data-panel" aria-label={`${resource.label} list`}>
+      <section className="panel data-panel" aria-label={`${resource.label} list`} aria-busy={loading}>
         <div className="panel-toolbar">
           <div><h2>All {resource.label.toLowerCase()}</h2><p>{totalRows} record{totalRows === 1 ? '' : 's'}</p></div>
           <label className="search-box">
@@ -369,7 +398,29 @@ function ResourcePanel({ resource, rows, loading, search, onSearchChange, onAdd,
         </div>
 
         {loading ? (
-          <div className="loading-state">Loading your learning data...</div>
+          <div className="table-scroll loading-table">
+            <span className="visually-hidden" role="status">Loading {resource.label.toLowerCase()}</span>
+            <table aria-hidden="true">
+              <thead>
+                <tr>
+                  {resource.columns.map((column) => <th key={column.key}>{column.label}</th>)}
+                  <th className="actions-heading">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }, (_, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {resource.columns.map((column, columnIndex) => (
+                      <td key={column.key}>
+                        <span className={`skeleton skeleton-cell${columnIndex === 0 ? ' skeleton-cell-primary' : ''}`} />
+                      </td>
+                    ))}
+                    <td className="row-actions"><span className="skeleton skeleton-cell skeleton-cell-actions" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : rows.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon" aria-hidden="true">{search ? 'S' : '+'}</span>
